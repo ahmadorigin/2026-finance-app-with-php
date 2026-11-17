@@ -1,0 +1,4 @@
+# app/.htaccess
+# Jangan biarkan browser membuka file logika secara langsung.
+
+Require all denied
