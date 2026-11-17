@@ -1,15 +1,6 @@
 <?php
 // actions/register.php
 require __DIR__ . '/../app/bootstrap.php';
-if (!function_exists('setFlash')) {
-    function setFlash(string $type, string $message): void
-    {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-        $_SESSION['flash'][$type] = $message;
-    }
-}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../register.php');

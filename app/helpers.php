@@ -33,3 +33,22 @@ function namaBulan(string $ym): string
     [$tahun, $bulan] = explode('-', $ym);
     return $daftar[$bulan] . ' ' . $tahun;
 }
+
+// Pindah halaman lalu hentikan script
+function redirect(string $url): void
+{
+    header("Location: $url");
+    exit;
+}
+// Menyimpan pesan sekali tampil (flash message)
+function setFlash(string $tipe, string $pesan): void
+{
+    $_SESSION['flash'] = ['tipe' => $tipe, 'pesan' => $pesan];
+}
+// Mengambil pesan lalu langsung menghapusnya dari session
+function ambilFlash(): ?array
+{
+    $flash = $_SESSION['flash'] ?? null;
+    unset($_SESSION['flash']);
+    return $flash;
+}
