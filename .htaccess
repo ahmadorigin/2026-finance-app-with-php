@@ -1,0 +1,7 @@
+#.htaccess (root project)
+# Jangan tampilkan isi folder jika tidak ada index.php
+Options -Indexes
+# Blokir akses langsung ke file SQL
+<FilesMatch "\.(sql|md)$">
+    Require all denied
+</FilesMatch>
