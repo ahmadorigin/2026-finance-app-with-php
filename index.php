@@ -9,4 +9,5 @@ $transaksi = ambilTransaksiBulan($pdo, $userId, $bulan);
 $ringkasan = ringkasanBulan($pdo, $userId, $bulan);
 $daftarBulan = daftarBulan($pdo, $userId);
 $flash = ambilFlash();
-require __DIR__ . '/views/dashboard.php';
+
+require_once __DIR__ . '/views/dashboard.php';
