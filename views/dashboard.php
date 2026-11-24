@@ -65,7 +65,8 @@ require __DIR__ . '/../index.php';
             Jumlah (Rp)
             <!-- inputmode membantu menampilkan keyboard angka pada perangkat mobile. -->
             <input type="text" id="amount" name="amount" inputmode="numeric" autocomplete="off" required
-                <?php // Saat edit, nilai database diformat titik hanya untuk ditampilkan di input. ?>
+                <?php // Saat edit, nilai database diformat titik hanya untuk ditampilkan di input. 
+                ?>
                 value="<?= isset($transaksiEdit['amount']) ? e(number_format((float) $transaksiEdit['amount'], 0, ',', '.')) : '' ?>">
         </label>
         <label>
@@ -81,7 +82,7 @@ require __DIR__ . '/../index.php';
         <label>
             Tanggal
             <input type="date" name="trx_date" required
-                <?= (isset($transaksiEdit)) ? 'value="' . e($transaksiEdit['trx_date']) . '"' : e(date('Y-m-d')) ?>>
+                value="<?= (isset($transaksiEdit)) ? e($transaksiEdit['trx_date']) : e(date('Y-m-d')) ?>">
         </label>
         <button type="submit">Simpan</button>
     </form>
