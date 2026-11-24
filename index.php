@@ -5,7 +5,14 @@ require __DIR__ . '/app/bootstrap.php';
 requireLogin();
 $userId = (int) $_SESSION['user_id'];
 $bulan = normalisasiBulan($_GET['bulan'] ?? null);
+
 $transaksi = ambilTransaksiBulan($pdo, $userId, $bulan);
+
+if (isset($_POST['id'])) {
+    $id = (int) $_POST['id'];
+    $transaksiEdit = ambilTransaksiById($pdo, $userId, $id);
+}
+
 $ringkasan = ringkasanBulan($pdo, $userId, $bulan);
 $daftarBulan = daftarBulan($pdo, $userId);
 $flash = ambilFlash();

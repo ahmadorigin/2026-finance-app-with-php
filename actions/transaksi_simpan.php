@@ -2,12 +2,21 @@
 // actions/transaksi_simpan.php
 require __DIR__ . '/../app/bootstrap.php';
 requireLogin('../login.php');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../index.php');
     exit;
 }
+
 $bulan = normalisasiBulan($_POST['bulan'] ?? null);
-$result = tambahTransaksi($pdo, (int) $_SESSION['user_id'], $_POST);
+
+if ($_POST['status'] === 'edit') {
+    $result = editTransaksi($pdo, (int) $_SESSION['user_id'], (int) $_POST['id'], $_POST);
+} else {
+    $result = tambahTransaksi($pdo, (int) $_SESSION['user_id'], $_POST);
+}
+
+
 if ($result['ok']) {
     setFlash('success', 'Transaksi berhasil disimpan.');
 } else {

@@ -42,6 +42,7 @@ function tambahTransaksi(PDO $pdo, int $userId, array $input): array
     if ($errors) {
         return ['ok' => false, 'errors' => $errors];
     }
+
     $note = trim($input['note'] ?? '');
     $stmt = $pdo->prepare(
         'INSERT INTO transactions (user_id, type, amount, category, note, trx_date)
@@ -58,6 +59,32 @@ function tambahTransaksi(PDO $pdo, int $userId, array $input): array
     return ['ok' => true, 'errors' => []];
 }
 
+// Mengedit transaksi yang sudah ada
+function editTransaksi(PDO $pdo, int $userId, int $id, array $input): array
+{
+    $errors = validasiTransaksi($input);
+    if ($errors) {
+        return ['ok' => false, 'errors' => $errors];
+    }
+
+    $note = trim($input['note'] ?? '');
+    $stmt = $pdo->prepare(
+        'UPDATE transactions
+            SET type = ?, amount = ?, category = ?, note = ?, trx_date = ?
+            WHERE id = ? AND user_id = ?'
+    );
+    $stmt->execute([
+        $input['type'],
+        (float) $input['amount'],
+        trim($input['category']),
+        $note === '' ? null : $note,
+        $input['trx_date'],
+        (int) $id,
+        $userId,
+    ]);
+    return ['ok' => true, 'errors' => []];
+}
+
 // Mengambil semua transaksi milik user pada satu bulan
 function ambilTransaksiBulan(PDO $pdo, int $userId, string $bulan): array
 {
@@ -69,6 +96,19 @@ function ambilTransaksiBulan(PDO $pdo, int $userId, string $bulan): array
     );
     $stmt->execute([$userId, $bulan]);
     return $stmt->fetchAll();
+}
+
+// Mengambil 1 transaksi milik user yg terpilih
+function ambilTransaksiById(PDO $pdo, int $userId, int $id): ?array
+{
+    $stmt = $pdo->prepare(
+        "SELECT id, type, amount, category, note, trx_date
+            FROM transactions
+            WHERE user_id = ? AND id = ?"
+    );
+    $stmt->execute([$userId, $id]);
+    $transaksi = $stmt->fetch();
+    return $transaksi ?: null;
 }
 
 // Menghitung total masuk, keluar, dan saldo pada satu bulan
@@ -106,6 +146,7 @@ function daftarBulan(PDO $pdo, int $userId): array
     $stmt->execute([$userId]);
     return array_column($stmt->fetchAll(), 'bulan');
 }
+
 // Menghapus transaksi. user_id ikut di WHERE supaya user tidak bisa menghapus
 function hapusTransaksi(PDO $pdo, int $userId, int $id): bool
 {
