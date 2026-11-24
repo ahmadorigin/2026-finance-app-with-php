@@ -12,21 +12,32 @@ function normalisasiBulan(?string $bulan): string
     return date('Y-m');
 }
 
-// Validasi input form. Mengembalikan array berisi pesan error (kosong = valid)
+// Mengubah amount tampilan menjadi angka murni sebelum divalidasi atau disimpan.
+// Titik adalah pemisah ribuan, sedangkan spasi juga dibuang untuk jaga-jaga.
+function normalisasiAmount(mixed $amount): string
+{
+    $amount = trim((string) $amount);
+    $amount = str_replace(['.', ' '], '', $amount);
+
+    return $amount;
+}
+
+// Validasi input form. Mengembalikan array berisi pesan error (kosong = valid).
 function validasiTransaksi(array $input): array
 {
     $errors = [];
     if (!in_array($input['type'] ?? '', ['income', 'expense'], true)) {
         $errors[] = 'Jenis transaksi tidak valid.';
     }
-    $jumlah = $input['amount'] ?? '';
+    // Nominal bertitik dinormalisasi dulu agar tetap bisa melewati validasi angka.
+    $jumlah = normalisasiAmount($input['amount'] ?? '');
     if (!is_numeric($jumlah) || (float) $jumlah <= 0) {
         $errors[] = 'Jumlah harus angka lebih dari 0.';
     }
     if (trim($input['category'] ?? '') === '') {
         $errors[] = 'Kategori wajib diisi.';
     }
-    // Tanggal harus tepat berformat YYYY-MM-DD dan benar-benar ada (misal buk
+    // Tanggal harus tepat berformat YYYY-MM-DD dan benar-benar ada.
     $tanggal = $input['trx_date'] ?? '';
     $dt = DateTime::createFromFormat('Y-m-d', $tanggal);
     if (!$dt || $dt->format('Y-m-d') !== $tanggal) {
@@ -43,6 +54,9 @@ function tambahTransaksi(PDO $pdo, int $userId, array $input): array
         return ['ok' => false, 'errors' => $errors];
     }
 
+    // Titik hanya format tampilan; database menerima angka tanpa pemisah ribuan.
+    // Normalisasi lagi saat edit agar data lama dan data baru memiliki format backend yang sama.
+    $amount = normalisasiAmount($input['amount'] ?? '');
     $note = trim($input['note'] ?? '');
     $stmt = $pdo->prepare(
         'INSERT INTO transactions (user_id, type, amount, category, note, trx_date)
@@ -51,7 +65,7 @@ function tambahTransaksi(PDO $pdo, int $userId, array $input): array
     $stmt->execute([
         $userId,
         $input['type'],
-        (float) $input['amount'],
+        $amount,
         trim($input['category']),
         $note === '' ? null : $note,
         $input['trx_date'],
@@ -67,6 +81,7 @@ function editTransaksi(PDO $pdo, int $userId, int $id, array $input): array
         return ['ok' => false, 'errors' => $errors];
     }
 
+    $amount = normalisasiAmount($input['amount'] ?? '');
     $note = trim($input['note'] ?? '');
     $stmt = $pdo->prepare(
         'UPDATE transactions
@@ -75,7 +90,7 @@ function editTransaksi(PDO $pdo, int $userId, int $id, array $input): array
     );
     $stmt->execute([
         $input['type'],
-        (float) $input['amount'],
+        $amount,
         trim($input['category']),
         $note === '' ? null : $note,
         $input['trx_date'],

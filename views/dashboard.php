@@ -63,8 +63,10 @@ require __DIR__ . '/../index.php';
         </label>
         <label>
             Jumlah (Rp)
-            <input type="number" name="amount" min="1" step="any" required
-                <?php if (isset($transaksiEdit)) echo 'value="' . e($transaksiEdit['amount']) . '"'; ?>>
+            <!-- inputmode membantu menampilkan keyboard angka pada perangkat mobile. -->
+            <input type="text" id="amount" name="amount" inputmode="numeric" autocomplete="off" required
+                <?php // Saat edit, nilai database diformat titik hanya untuk ditampilkan di input. ?>
+                value="<?= isset($transaksiEdit['amount']) ? e(number_format((float) $transaksiEdit['amount'], 0, ',', '.')) : '' ?>">
         </label>
         <label>
             Kategori
@@ -83,6 +85,34 @@ require __DIR__ . '/../index.php';
         </label>
         <button type="submit">Simpan</button>
     </form>
+    <script>
+        const inputAmount = document.getElementById('amount');
+
+        if (inputAmount) {
+            inputAmount.addEventListener('input', function() {
+                const posisi = this.selectionStart;
+                const jumlahDigitSebelumCaret = this.value.slice(0, posisi).replace(/\D/g, '').length;
+                const angka = this.value.replace(/\D/g, '');
+                const formatJumlah = angka.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+                this.value = formatJumlah;
+
+                let posisiBaru = 0;
+                let digitDihitung = 0;
+                while (posisiBaru < formatJumlah.length && digitDihitung < jumlahDigitSebelumCaret) {
+                    if (/\d/.test(formatJumlah[posisiBaru])) {
+                        digitDihitung++;
+                    }
+                    posisiBaru++;
+                }
+                this.setSelectionRange(posisiBaru, posisiBaru);
+            });
+
+            inputAmount.form.addEventListener('submit', function() {
+                inputAmount.value = inputAmount.value.replace(/\./g, '');
+            });
+        }
+    </script>
 </section>
 
 <!-- Daftar transaksi -->
